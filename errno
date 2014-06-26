@@ -1,0 +1,8 @@
+#!/bin/sh -e
+headers="/usr/include/asm-generic/errno*.h"
+code="$1"
+if echo "$code" | grep -qs "[0-9]"; then
+	grep -hw "\W$code\W" $headers | sed 's/^#define\s*//'
+else
+	grep -hi "$code" $headers | sed 's/^#define\s*//'
+fi
