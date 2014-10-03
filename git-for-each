@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+USAGE="[<commit-id>...] executable [ -- args ]"
+LONG_USAGE='checkout each commit and run `executable "$args"'"'"' for each commit in reverse chronological order'
+source "$(git --exec-path)/git-sh-setup"
+
+require_work_tree
+require_clean_work_tree checkout "Please commit or stash them."
+
+refspec=HEAD
+
+exe="$(which $1 2>/dev/null)"
+if [[ ! -x "$exe" ]]
+then
+	refspec="$1"
+	shift
+fi
+
+exe="$(which $1)"
+shift 1
+if [[ ! -x "$exe" ]]
+then
+	usage
+fi
+
+curr=$(git name-rev HEAD 2>/dev/null | awk '{print $2}')
+trap 'git checkout "$curr" &>/dev/null' EXIT
+
+git rev-list "$refspec" | while read commit
+do
+	git checkout $commit &>/dev/null
+	git clean -fxd &>/dev/null
+	git checkout . &>/dev/null
+	echo -n "$commit  "
+	err=$(mktemp)
+	"$exe" "$@" >/dev/null 2>$err
+	if [[ $? -eq 0 ]]
+	then
+		echo ok
+	else
+		echo bad
+		tput setaf 1
+		cat $err
+		tput sgr0
+	fi
+	git clean -fxd &>/dev/null
+	git checkout . &>/dev/null
+	rm -f $err
+done

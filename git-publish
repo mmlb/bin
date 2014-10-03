@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+usage() {
+	cat <<EOF
+usage: $(basename $0) [remote]
+EOF
+}
+
+(($# > 1)) && usage && exit 1
+
+remote=${1:-origin}
+branch=$(git name-rev HEAD 2>/dev/null | awk '{print $2}')
+
+git push $remote $branch
+git branch -u $remote/$branch $branch
