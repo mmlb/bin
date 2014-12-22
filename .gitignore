@@ -1,4 +1,5 @@
 .*
+!.drone.yml
 !.gitignore
 
 phash
