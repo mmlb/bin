@@ -26,13 +26,16 @@ fi
 curr=$(git name-rev HEAD 2>/dev/null | awk '{print $2}')
 trap 'git checkout "$curr" &>/dev/null' EXIT
 
-git rev-list "$refspec" | while read commit
+tmpdir=$(mktemp -d /tmp/git-for-each-XXXXXXXX.d)
+
+#git rev-list --pretty=oneline --abbrev-commit --reverse "$refspec" | while read commit msg
+git rev-list --reverse "$refspec" | while read commit msg
 do
 	git checkout $commit &>/dev/null
 	git clean -fxd &>/dev/null
 	git checkout . &>/dev/null
+	err="$tmpdir/$commit"
 	echo -n "$commit  "
-	err=$(mktemp)
 	"$exe" "$@" >/dev/null 2>$err
 	if [[ $? -eq 0 ]]
 	then
@@ -45,5 +48,5 @@ do
 	fi
 	git clean -fxd &>/dev/null
 	git checkout . &>/dev/null
-	rm -f $err
 done
+rm -rf "$tmpdir"
