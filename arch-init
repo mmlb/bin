@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 nitrogen --restore
-nohup gnome-screensaver &>/dev/null &
+nohup /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &>/dev/null &
 nohup pulseaudio &>/dev/null &
 nohup pasystray &>/dev/null &
+nohup pidgin &>/dev/null &
 nohup nm-applet &>/dev/null &
-#sudo sh -c 'systemctl stop ntpd && ntpdate $(awk "/^server/ {print \$2}" /etc/ntp.conf) && systemctl start ntpd'
